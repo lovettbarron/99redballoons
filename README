@@ -1,0 +1,3 @@
+Requires the toxiclibs libraries and shiffman's libfreenect port for Processing.
+
+Just run as a standard Processing sketch.
