@@ -36,11 +36,11 @@ int screenW = 1280;
 int screenH = 960;
 int dWidth = 640;
 int dHeight = 480;
-int multi = 16;
+int multi = 32;
 int zmulti = 5;
 int YDISPLACE = 520;
-int ZTHRESH = 15;
-int pointSize = 30;
+int ZTHRESH = 4;
+int pointSize = 40;
 
 //Balloon
 int luftBalloons = 49;
@@ -58,6 +58,7 @@ boolean showGrid = true;
 boolean showAxis = false  ;
 boolean showGround = false;
 boolean subBackground = false;
+boolean showDebug = false;
 Vec3D buttonPos;
 int firstIndex, lastIndex;
 
@@ -79,7 +80,7 @@ int totalIterations, numClipped = 0;
 void setup() {
   size(screenW,screenH,OPENGL);
   frameRate(15);
-  sphereDetail(4);
+  sphereDetail(2);
   textFont(createFont("SansSerif",18));
   gfx=new ToxiclibsSupport(this);
   initBjork();
@@ -91,13 +92,13 @@ void setup() {
   if(setupComplete == false) {
     ksubtract = createImage(dWidth,dHeight,RGB);
   }
-
+  counter = -100;
   points = new ArrayList();
   spherePoints = new ArrayList();
 
   buttonPos = new Vec3D( 600, 600, 300);
 
-  button = new XAxisCylinder( new Vec3D(), 150, 60);
+  button = new XAxisCylinder( new Vec3D(), 150, 30);
   button.setPosition( new Vec3D( buttonPos ) );
 
   if(setupComplete == false) {
@@ -126,9 +127,12 @@ void draw() {
   updateBalloon();
   cleanUp();
   popMatrix();
-  drawTextOverlay();
-  drawImageOverlay();
+  if( showDebug ) {
+    drawTextOverlay();
+    drawImageOverlay();
+  }
   totalIterations++;
+  //println( counter );
 }
 
 
@@ -157,7 +161,7 @@ void partyButton() {
   noStroke();
   drawMesh( button.toMesh() );
   pushMatrix();
-  translate( buttonPos.x-41, buttonPos.y+50, buttonPos.z-120);
+  translate( buttonPos.x-41, buttonPos.y+50, buttonPos.z-150);
   rotateY(-HALF_PI);
   fill( 255,255,0);
   scale(2,7);
@@ -178,13 +182,20 @@ void doPartyButton() {
     if( counter < luftBalloons && counter > 0) {
       makeBalloon();
     }
-    else if( counter > luftBalloons*2 && counter < (luftBalloons*2)+luftBalloons+3 ) {
+    else if( counter > 445 && counter < 1400 && counter % 8 == 1 ) {
       destroyBalloon();
-    } 
-    else if ( counter >= (luftBalloons*2)+luftBalloons) {
+      makeBalloon();
+    }
+
+    else if ( counter >= 1600) {
+      stopBjork();
+      setup();
       spheres.clear();
       resetButton();
     }
+    else if( counter > 1500) {
+      destroyBalloon();
+    } 
     counter++;
   }
 }
@@ -201,7 +212,6 @@ void resetButton () {
   else {
     stopBjork();
     buttonActive = false;
-    setup();
   }
 }
 
@@ -244,7 +254,7 @@ void updateBalloon() {
     s.applyConstraints();
     //    gfx.sphere( new Sphere(new Vec3D( s.x, s.y, s.z ), (float)pointSize*5 ) );
     drawObject( (VerletParticle)s, true, balloonSize);
-    println("Particle position: " + s.x + ", " + s.y + ", " + s.z);
+    //println("Particle position: " + s.x + ", " + s.y + ", " + s.z);
   }
 }
 
@@ -255,4 +265,3 @@ void destroyBalloon() {
     break;
   }
 }
-
